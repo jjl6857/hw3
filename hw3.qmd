@@ -1,11 +1,10 @@
 ---
 title: "Homework 3"
-author: "[Insert your name here]{style='background-color: yellow;'}"
+author: "jiaxi li"
 toc: true
 title-block-banner: true
 title-block-style: default
-format: html
-# format: pdf
+format: pdf
 ---
 
 ---
@@ -25,7 +24,10 @@ For this assignment, we will be using the [Wine Quality](https://archive.ics.uci
 
 We will be using the following libraries:
 
-```R
+
+
+```{R}
+library(Matrix)
 library(readr)
 library(tidyr)
 library(dplyr)
@@ -33,6 +35,8 @@ library(purrr)
 library(car)
 library(glmnet)
 ```
+
+
 
 <br><br><br><br>
 ---
@@ -47,15 +51,22 @@ Regression with categorical covariate and $t$-Test
 
 Read the wine quality datasets from the specified URLs and store them in data frames `df1` and `df2`.
 
-```R
+```{R}
 url1 <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv"
 
 url2 <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
 
 
-df1 <- ... # Insert your code here
-df2 <- ... # Insert your code here
+
+df1 <- read.csv(url1, sep=';') # Insert your code here
+df2 <- read.csv(url2, sep=';') # Insert your code here
+
+
+head(df1)
+head(df2)
+
 ```
+
 
 ---
 
@@ -70,9 +81,34 @@ Perform the following tasks to prepare the data frame `df` for analysis:
 1. Remove rows (if any) with missing values.
 
 
-```R
-df <- ... # Insert your code here
+# 1
+```{R}
+df1 <- mutate(df1,type= "white")
+df2 <- mutate(df2,type = "red")
+df_list <- list(df1, df2)
+combined_df <- Reduce(function(x, y) merge(x, y, all=TRUE), df_list)
+combined_df
 ```
+```{R}
+df <- gsub(" ", "_", combined_df)
+head(df)
+
+```
+
+```{R}
+new_df <- combined_df %>% select(-fixed.acidity, -free.sulfur.dioxide)
+new_df
+```
+
+
+```{R}
+new_df <- new_df %>%
+  na.omit() %>%
+  mutate(type = as.factor(type))
+
+new_df
+```
+
 
 
 Your output to `R dim(df)` should be
@@ -94,12 +130,22 @@ Recall from STAT 200, the method to compute the $t$ statistic for the the differ
 
 3. Using `sp_squared` and `diff_mean`, compute the $t$ Statistic, and store its value in a variable called `t1`.
 
+```{R}
+df_white <- new_df %>%
+  filter(type == "white") %>%
+  summarise(mean(quality))
+df_red <- new_df %>%
+  filter(type == "red") %>%
+  summarise(mean(quality))
+```
 
-```R
+
+```{R}
 diff_mean <- ... # Insert your code here
 sp <-  ... # Insert your code here
 t1 <-  ... # Insert your code here
 ```
+
 
 
 ---
